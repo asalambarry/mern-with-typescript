@@ -1,11 +1,13 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
-import NoteModel from '../models/notes';
+import express from 'express';
+import * as NotesController from '../controllers/notesControllers';
 
-const getNotes: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-	try {
-		const notes = await NoteModel.find().exec();
-		res.status(200).json(notes);
-	} catch (error) {
-		next(error);
-	}
-};
+
+const router = express.Router();
+
+router.get("/", NotesController.getNotes);
+
+router.get("/:noteId", NotesController.getNoteId);
+
+router.post("/", NotesController.createNote);
+
+export default router;

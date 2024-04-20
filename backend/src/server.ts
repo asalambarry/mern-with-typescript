@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express from 'express';
 import mongoose from "mongoose";
-const app = express();
+import morgan from "morgan";
+import notesRoutes from './routes/notes';
 // const port = 8080;
 
 // app.get('/', (req, res) => {
@@ -17,9 +18,14 @@ const app = express();
 // 		next(error);
 // 	}
 // });
+const app = express();
+app.use(morgan("dev"));
+app.use(express.json());
+
+app.use("/notes", notesRoutes);
 
 app.use((req, res, next) => {
-	next( Error("Endpoint not found........!"));
+	next(Error("Endpoint not found........!"));
 });
 
 app.use((error: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
