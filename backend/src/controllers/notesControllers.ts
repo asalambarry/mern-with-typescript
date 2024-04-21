@@ -30,7 +30,7 @@ const getNoteId: RequestHandler = async (req: Request, res: Response, next: Next
 	}
 
 	try {
-		if(!mongoose.isValidObjectId(noteId)){
+		if (!mongoose.isValidObjectId(noteId)) {
 			throw createHttpError(400, "ID n'existe pas !");
 		}
 		const note = await NoteModel.findById(noteId).exec();
@@ -38,7 +38,7 @@ const getNoteId: RequestHandler = async (req: Request, res: Response, next: Next
 		// 	res.status(404).json({ message: "Note not found!" });
 		// 	return;
 		// }
-		if(!note){
+		if (!note) {
 			throw createHttpError(404, "Note not found!");
 		}
 		res.status(200).json(note);
@@ -55,7 +55,7 @@ const createNote: RequestHandler<unknown, unknown, CreateNoteInterface, unknown>
 	const title = req.body.title;
 	const text = req.body.text;
 	try {
-		if(!title){
+		if (!title) {
 			throw createHttpError(400, "Title is required!");
 		}
 		const newNote = await NoteModel.create({ title: title, text: text });
@@ -64,5 +64,65 @@ const createNote: RequestHandler<unknown, unknown, CreateNoteInterface, unknown>
 		next(error)
 	}
 };
+// Pour modifier une note
+/**
+ * Represents the parameters for updating a note.
+ */
+interface UpdateNoteInterfaceParams {
+	/**
+	 * The ID of the note to be updated.
+	 */
+	noteId: string;
+}
+interface UpdateNoteInterface {
+	title?: string;
+	text?: string;
+}
+const updateNote: RequestHandler<UpdateNoteInterfaceParams, unknown, UpdateNoteInterface, unknown> = async (req, res, next) => {
+	const noteId = req.params.noteId;
+	const newTitle = req.body.title;
+	const newText = req.body.text;
 
-export { createNote, getNoteId, getNotes };
+	try {
+		if (!mongoose.isValidObjectId(noteId)) {
+			throw createHttpError(400, "ID n'existe pas !");
+		}
+		if (!newTitle) {
+			throw createHttpError(400, "Title is required!");
+		}
+		if (!newText) {
+			throw createHttpError(400, "Text is required!");
+		}
+		const note = await NoteModel.findByIdAndUpdate(noteId, {}, { new: true }).exec();
+		if (!note) {
+			throw createHttpError(404, "Note not found!");
+		}
+		note.title = newTitle;
+		note.text = newText;
+
+		const updatedNote = await note.save();
+		res.status(200).json(updatedNote);
+
+	} catch (error) {
+		next(error)
+	}
+};
+// Pour supprimer une note
+const deleteNote: RequestHandler = async (req, res, next) => {
+	const noteId = req.params.noteId;
+
+	try{
+		if (!mongoose.isValidObjectId(noteId)) {
+			throw createHttpError(400, "ID n'existe pas !");
+		}
+		const note = await NoteModel.findByIdAndDelete(noteId).exec();
+		if (!note) {
+			throw createHttpError(404, "Note not found!");
+		}
+		res.status(204).send();
+	} catch (error) {
+		next(error);
+	}
+}
+
+export { createNote, getNoteId, getNotes, updateNote, deleteNote };
