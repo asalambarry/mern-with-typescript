@@ -6,6 +6,7 @@ import NoteModel from '../models/notes';
 // Pour recuperer toutes les notes
 const getNotes: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
 	try {
+		// throw createHttpError(401, "Erreur serveur !");
 		const notes = await NoteModel.find().exec();
 		res.status(200).json(notes);
 	} catch (error) {
@@ -125,4 +126,4 @@ const deleteNote: RequestHandler = async (req, res, next) => {
 	}
 }
 
-export { createNote, getNoteId, getNotes, updateNote, deleteNote };
+export { createNote, deleteNote, getNoteId, getNotes, updateNote };
